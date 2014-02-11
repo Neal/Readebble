@@ -1,0 +1,22 @@
+{
+	"uuid": "f50e354a-e8d9-46be-be74-0c5f488b3a4d",
+	"shortName": "Readebble",
+	"longName": "Readebble",
+	"companyName": "Neal",
+	"versionCode": 1,
+	"versionLabel": "1.0",
+	"capabilities": [ "configurable" ],
+	"watchapp": {
+		"watchface": false
+	},
+	"appKeys": {
+		"subscription": 0,
+		"headline": 1,
+		"index": 2,
+		"title": 3,
+		"summary": 4
+	},
+	"resources": {
+		"media": []
+	}
+}
