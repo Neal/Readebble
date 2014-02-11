@@ -85,7 +85,7 @@ function fetchHeadlines(subscription) {
 function sendSubscriptions() {
 	appMessageQueue.clear();
 	if (subscriptions.length === 0) {
-		appMessageQueue.add({index: true});
+		appMessageQueue.add({subscription: true, index: true});
 	}
 	for (var i = 0; i < subscriptions.length; i++) {
 		appMessageQueue.add({subscription: true, index: i, title: subscriptions[i].title});
