@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+		<meta charset='utf-8'>
+		<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=0'>
+		<meta name='description' content='Package Trackr Configuration'>
+		<title>Readebble Configuration</title>
+		<link href='//netdna.bootstrapcdn.com/bootswatch/3.1.0/flatly/bootstrap.min.css' rel='stylesheet'>
+		<link href='//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet'>
+		<link href='style.css' rel='stylesheet'>
+	</head>
+
+	<body>
+		<div class='container'>
+
+			<button type='submit' class='btn btn-primary btn-block btn-lg btn-save'>Save</button>
+
+			<div class='add-subscription well well-sm'>
+				<button type='button' class='btn btn-success btn-add-subscription'>Add Subscription</button>
+			</div>
+
+			<h4>Subscriptions</h4>
+			<div class='panel-container panel-group' id='accordion'>
+				<div class='panel panel-default panel-success panel-template'>
+					<div class='panel-heading'>
+						<i class='handle fa fa-bars'></i>
+						<span class='panel-title'></span>
+						<a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#panel_template'></a>
+						<span class='btn btn-danger btn-delete'><i class='fa fa-trash-o fa-lg'></i></span>
+					</div>
+					<div id='panel_template' class='panel-collapse collapse in'>
+						<div class='panel-body'>
+							<div class='form-group'>
+								<label for='title'>Title</label>
+								<input type='text' class='form-control' id='title' maxlength='30' />
+							</div>
+							<div class='form-group'>
+								<label for='url'>URL</label>
+								<input type='text' class='form-control' id='url' maxlength='300' />
+							</div>
+						</div>
+					</div>
+				</div> <!-- /panel-template -->
+			</div> <!-- /panel-container -->
+
+			<button type='submit' class='btn btn-primary btn-block btn-lg btn-save'>Save</button>
+
+		</div> <!-- /container -->
+
+		<script src='//code.jquery.com/jquery-1.10.2.min.js'></script>
+		<script src='//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js'></script>
+		<script src='//code.jquery.com/ui/1.10.3/jquery-ui.min.js'></script>
+		<script src='//code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.js'></script>
+		<script src='//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js'></script>
+		<script src='script.js'></script>
+	</body>
+</html>
