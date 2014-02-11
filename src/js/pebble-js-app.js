@@ -73,7 +73,7 @@ function fetchHeadlines(subscription) {
 			res = JSON.parse(xhr.responseText);
 			headlines = res.responseData.feed.entries;
 			headlines.forEach(function (element, index, array) {
-				var title = decodeURIComponent(element.title).substring(0,160) || '';
+				var title = element.title.substring(0,160) || '';
 				appMessageQueue.add({headline: true, index: index, title: title});
 			});
 		}
