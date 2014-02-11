@@ -1,3 +1,3 @@
 # Readebble
 
-Readebble is an RSS news reader for the Pebble Smartwatch.
+Readebble is a multiple source RSS reader for the Pebble Smartwatch.
