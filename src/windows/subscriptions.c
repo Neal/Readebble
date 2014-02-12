@@ -8,9 +8,9 @@
 
 static subscription_t subscriptions[MAX_SUBSCRIPTIONS];
 
-static int num_subscriptions;
-static bool no_subscriptions;
-static bool out_failed;
+static int num_subscriptions = 0;
+static bool no_subscriptions = false;
+static bool out_failed = false;
 
 static void refresh_list();
 static void request_data();
@@ -44,8 +44,6 @@ void subscriptions_init(void) {
 	menu_layer_add_to_window(menu_layer, window);
 
 	window_stack_push(window, true);
-
-	refresh_list();
 }
 
 void subscriptions_destroy(void) {

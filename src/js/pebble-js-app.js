@@ -93,6 +93,10 @@ function sendSubscriptions() {
 	appMessageQueue.send();
 }
 
+Pebble.addEventListener('ready', function(e) {
+	sendSubscriptions();
+});
+
 Pebble.addEventListener('appmessage', function(e) {
 	console.log('AppMessage received from Pebble: ' + JSON.stringify(e.payload));
 	if (e.payload.summary) {
