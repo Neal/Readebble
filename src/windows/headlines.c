@@ -117,7 +117,7 @@ static int16_t menu_get_header_height_callback(struct MenuLayer *menu_layer, uin
 
 static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 	if (num_headlines != 0) {
-		return graphics_text_layout_get_content_size(headlines[cell_index->row].title, fonts_get_system_font(FONT_KEY_GOTHIC_18), (GRect) { .origin = { 2, 0 }, .size = { PEBBLE_WIDTH - 4, 128 } }, GTextOverflowModeFill, GTextAlignmentLeft).h + 8;
+		return graphics_text_layout_get_content_size(headlines[cell_index->row].title, fonts_get_system_font(FONT_KEY_GOTHIC_18), (GRect) { .origin = { 2, 0 }, .size = { PEBBLE_WIDTH - 4, 128 } }, GTextOverflowModeFill, GTextAlignmentLeft).h + 6;
 	}
 	return MENU_CELL_BASIC_CELL_HEIGHT;
 }
