@@ -4,7 +4,7 @@
 	"longName": "Readebble",
 	"companyName": "Neal",
 	"versionCode": 1,
-	"versionLabel": "1.0.2",
+	"versionLabel": "1.0.3",
 	"capabilities": [ "configurable" ],
 	"watchapp": {
 		"watchface": false
