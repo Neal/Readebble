@@ -19,7 +19,8 @@ static TextLayer *summary_layer;
 
 void news_init(headline_t h) {
 	headline = h;
-	strncpy(title, "Loading story...", sizeof(title) - 1);
+
+	request_data();
 
 	window = window_create();
 
@@ -34,8 +35,6 @@ void news_init(headline_t h) {
 	layer_add_child(window_get_root_layer(window), scroll_layer_get_layer(scroll_layer));
 
 	window_stack_push(window, true);
-
-	request_data();
 }
 
 void news_destroy(void) {
@@ -70,6 +69,7 @@ void news_out_failed_handler(DictionaryIterator *failed, AppMessageResult reason
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
 static void request_data() {
+	strncpy(title, "Loading story...", sizeof(title) - 1);
 	summary[0] = '\0';
 	Tuplet summary_tuple = TupletInteger(KEY_SUMMARY, 1);
 	Tuplet index_tuple = TupletInteger(KEY_INDEX, headline.index);
