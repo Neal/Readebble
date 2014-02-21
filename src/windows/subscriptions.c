@@ -142,6 +142,7 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 	if (num_subscriptions > 0) {
+		headlines_destroy();
 		headlines_init(subscriptions[cell_index->row]);
 	}
 }

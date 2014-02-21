@@ -69,6 +69,7 @@ function fetchHeadlines(subscription) {
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', 'https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=30&q=' + encodeURIComponent(subscription.url), true);
 	xhr.onload = function(e) {
+		appMessageQueue.add({headline: true, index: true});
 		if (xhr.readyState == 4 && xhr.status == 200) {
 			res = JSON.parse(xhr.responseText);
 			headlines = res.responseData.feed.entries;

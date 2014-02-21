@@ -10,6 +10,7 @@ static headline_t headlines[MAX_HEADLINES];
 static subscription_t subscription;
 static int num_headlines;
 static bool out_failed;
+static bool can_receive;
 
 static void refresh_list();
 static void request_data();
@@ -50,6 +51,7 @@ void headlines_init(subscription_t s) {
 }
 
 void headlines_destroy(void) {
+	can_receive = false;
 	news_destroy();
 	menu_layer_destroy_safe(menu_layer);
 	window_destroy_safe(window);
@@ -59,7 +61,7 @@ void headlines_in_received_handler(DictionaryIterator *iter) {
 	Tuple *index_tuple = dict_find(iter, KEY_INDEX);
 	Tuple *title_tuple = dict_find(iter, KEY_TITLE);
 
-	if (index_tuple && title_tuple) {
+	if (index_tuple && title_tuple && can_receive) {
 		if (index_tuple->value->int16 == 0) num_headlines = 0;
 		out_failed = false;
 		headline_t headline;
@@ -68,6 +70,12 @@ void headlines_in_received_handler(DictionaryIterator *iter) {
 		headlines[headline.index] = headline;
 		num_headlines++;
 		menu_layer_reload_data_and_mark_dirty(menu_layer);
+	}
+	else if (index_tuple) {
+		can_receive = true;
+	}
+	else if (!can_receive) {
+		app_message_outbox_send();
 	}
 }
 
@@ -85,6 +93,7 @@ static void refresh_list() {
 	memset(headlines, 0x0, sizeof(headlines));
 	num_headlines = 0;
 	out_failed = false;
+	can_receive = false;
 	menu_layer_set_selected_index(menu_layer, (MenuIndex) { .row = 0, .section = 0 }, MenuRowAlignBottom, false);
 	menu_layer_reload_data_and_mark_dirty(menu_layer);
 	request_data();
@@ -141,6 +150,7 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 	if (num_headlines > 0) {
+		can_receive = false;
 		news_init(headlines[cell_index->row]);
 	}
 }
