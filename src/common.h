@@ -16,4 +16,5 @@ enum {
 	KEY_INDEX = 0x2,
 	KEY_TITLE = 0x3,
 	KEY_SUMMARY = 0x4,
+	KEY_SETTINGS = 0x10,
 };

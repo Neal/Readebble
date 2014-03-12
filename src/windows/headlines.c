@@ -2,6 +2,7 @@
 #include "headlines.h"
 #include "../libs/pebble-assist.h"
 #include "../common.h"
+#include "../settings.h"
 #include "news.h"
 
 #define MAX_HEADLINES 30
@@ -126,7 +127,7 @@ static int16_t menu_get_header_height_callback(struct MenuLayer *menu_layer, uin
 
 static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 	if (num_headlines != 0) {
-		return graphics_text_layout_get_content_size(headlines[cell_index->row].title, fonts_get_system_font(FONT_KEY_GOTHIC_18), (GRect) { .origin = { 2, 0 }, .size = { PEBBLE_WIDTH - 4, 128 } }, GTextOverflowModeFill, GTextAlignmentLeft).h + 6;
+		return graphics_text_layout_get_content_size(headlines[cell_index->row].title, fonts_get_system_font(settings()->headlines_font_size ? FONT_KEY_GOTHIC_24 : FONT_KEY_GOTHIC_18), (GRect) { .origin = { 2, 0 }, .size = { PEBBLE_WIDTH - 4, 128 } }, GTextOverflowModeFill, GTextAlignmentLeft).h + (settings()->headlines_font_size ? 10 : 6);
 	}
 	return MENU_CELL_BASIC_CELL_HEIGHT;
 }
@@ -144,7 +145,7 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 		graphics_draw_text(ctx, "Loading headlines...", fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), (GRect) { .origin = { 2, 8 }, .size = { PEBBLE_WIDTH - 4, 128 } }, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	} else {
 		graphics_context_set_text_color(ctx, GColorBlack);
-		graphics_draw_text(ctx, headlines[cell_index->row].title, fonts_get_system_font(FONT_KEY_GOTHIC_18), (GRect) { .origin = { 2, 0 }, .size = { PEBBLE_WIDTH - 4, 128 } }, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, headlines[cell_index->row].title, fonts_get_system_font(settings()->headlines_font_size ? FONT_KEY_GOTHIC_24 : FONT_KEY_GOTHIC_18), (GRect) { .origin = { 2, 0 }, .size = { PEBBLE_WIDTH - 4, 128 } }, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	}
 }
 

@@ -2,6 +2,7 @@
 #include "news.h"
 #include "../libs/pebble-assist.h"
 #include "../common.h"
+#include "../settings.h"
 
 static headline_t headline;
 static char title[64];
@@ -23,6 +24,7 @@ void news_init(headline_t h) {
 	request_data();
 
 	window = window_create();
+	window_set_background_color(window, settings()->summary_font_color ? GColorBlack : GColorWhite);
 
 	scroll_layer = scroll_layer_create(layer_get_bounds(window_get_root_layer(window)));
 	scroll_layer_set_click_config_onto_window(scroll_layer, window);
@@ -102,13 +104,17 @@ static void window_refresh() {
 	title_layer = text_layer_create(max_text_bounds);
 	text_layer_set_font(title_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	text_layer_set_text(title_layer, title);
+	text_layer_set_text_color(title_layer, settings()->summary_font_color ? GColorWhite : GColorBlack);
+	text_layer_set_background_color(title_layer, GColorClear);
 
 	GSize title_max_size = text_layer_get_content_size(title_layer);
 	text_layer_set_size(title_layer, GSize(title_max_size.w, title_max_size.h + 14));
 
 	summary_layer = text_layer_create(GRect(2, title_max_size.h + 14, max_text_bounds.size.w, max_text_bounds.size.h - (title_max_size.h + 14)));
-	text_layer_set_font(summary_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_font(summary_layer, fonts_get_system_font(settings()->summary_font_size ? FONT_KEY_GOTHIC_24_BOLD : FONT_KEY_GOTHIC_18_BOLD));
 	text_layer_set_text(summary_layer, summary);
+	text_layer_set_text_color(summary_layer, settings()->summary_font_color ? GColorWhite : GColorBlack);
+	text_layer_set_background_color(summary_layer, GColorClear);
 
 	GSize summary_max_size = text_layer_get_content_size(summary_layer);
 	text_layer_set_size(summary_layer, GSize(summary_max_size.w, summary_max_size.h + 14));

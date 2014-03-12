@@ -3,6 +3,7 @@
 #include "../libs/pebble-assist.h"
 #include "../common.h"
 #include "headlines.h"
+#include "settings.h"
 
 #define MAX_SUBSCRIPTIONS 30
 
@@ -48,6 +49,7 @@ void subscriptions_init(void) {
 
 void subscriptions_destroy(void) {
 	headlines_destroy();
+	settings_destroy();
 	menu_layer_destroy_safe(menu_layer);
 	window_destroy_safe(window);
 }
@@ -106,10 +108,11 @@ static void request_data() {
 }
 
 static uint16_t menu_get_num_sections_callback(struct MenuLayer *menu_layer, void *callback_context) {
-	return 1;
+	return 2;
 }
 
 static uint16_t menu_get_num_rows_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
+	if (section_index == 1) return 1;
 	return (num_subscriptions) ? num_subscriptions : 1;
 }
 
@@ -122,11 +125,20 @@ static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuI
 }
 
 static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context) {
-	menu_cell_basic_header_draw(ctx, cell_layer, "Readebble");
+	switch (section_index) {
+		case 0:
+			menu_cell_basic_header_draw(ctx, cell_layer, "Readebble");
+			break;
+		case 1:
+			menu_cell_basic_header_draw(ctx, cell_layer, "Other");
+			break;
+	}
 }
 
 static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
-	if (out_failed) {
+	if (cell_index->section == 1) {
+		menu_cell_basic_draw(ctx, cell_layer, "Settings", NULL, NULL);
+	} else if (out_failed) {
 		graphics_context_set_text_color(ctx, GColorBlack);
 		graphics_draw_text(ctx, "Phone unreachable!", fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), (GRect) { .origin = { 2, 8 }, .size = { PEBBLE_WIDTH - 4, 128 } }, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	} else if (no_subscriptions) {
@@ -141,7 +153,10 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 }
 
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-	if (num_subscriptions > 0) {
+	if (cell_index->section == 1) {
+		settings_init();
+	}
+	else if (num_subscriptions > 0) {
 		headlines_destroy();
 		headlines_init(subscriptions[cell_index->row]);
 	}
