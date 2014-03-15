@@ -74,7 +74,7 @@ static int16_t menu_get_header_height_callback(struct MenuLayer *menu_layer, uin
 }
 
 static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-	return 36;
+	return 38;
 }
 
 static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context) {
@@ -116,7 +116,7 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 	graphics_context_set_text_color(ctx, GColorBlack);
 	graphics_draw_text(ctx, label, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(4, 2, 136, 28), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 	if (strlen(value) > 0) {
-		graphics_draw_text(ctx, value, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 6, 136, 24), GTextOverflowModeTrailingEllipsis, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, value, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 7, 134, 24), GTextOverflowModeTrailingEllipsis, GTextAlignmentRight, NULL);
 	}
 }
 
