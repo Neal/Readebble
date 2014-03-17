@@ -14,7 +14,8 @@
 		"headline": 1,
 		"index": 2,
 		"title": 3,
-		"summary": 4
+		"summary": 4,
+		"pocket": 5
 	},
 	"resources": {
 		"media": [

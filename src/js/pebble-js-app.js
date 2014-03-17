@@ -1,3 +1,4 @@
+var pocket = JSON.parse(localStorage.getItem('pocket')) || {};
 var subscriptions = JSON.parse(localStorage.getItem('subscriptions')) || [];
 var headlines = [];
 
@@ -38,6 +39,22 @@ var appMessageQueue = {
 		}
 	}
 };
+
+function addToPocket(headline) {
+	var url = headline.link || '';
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'http://ineal.me/pebble/readebble/pocket/add?access_token=' + decodeURIComponent(pocket.access_token) + '&url=' + decodeURIComponent(url), true);
+	xhr.onload = function() {
+		if (xhr.readyState == 4 && xhr.status == 200) {
+			res = JSON.parse(xhr.responseText);
+			if (res.item && res.status == 1) {
+				var title = res.item.title || 'article';
+				Pebble.showSimpleNotificationOnPebble('Readebble', 'Successfully added ' + title + ' to Pocket!');
+			}
+		}
+	};
+	xhr.send(null);
+}
 
 function summarize(headline) {
 	var url = headline.link || '';
@@ -100,7 +117,9 @@ Pebble.addEventListener('ready', function(e) {
 
 Pebble.addEventListener('appmessage', function(e) {
 	console.log('AppMessage received from Pebble: ' + JSON.stringify(e.payload));
-	if (e.payload.summary) {
+	if (e.payload.pocket) {
+		addToPocket(headlines[e.payload.index]);
+	} else if (e.payload.summary) {
 		summarize(headlines[e.payload.index]);
 	} else if (e.payload.headline) {
 		fetchHeadlines(subscriptions[e.payload.index]);
@@ -119,9 +138,19 @@ Pebble.addEventListener('showConfiguration', function() {
 
 Pebble.addEventListener('webviewclosed', function(e) {
 	if (e.response) {
+		console.log(e.response);
 		var data = JSON.parse(decodeURIComponent(e.response));
-		subscriptions = data.subscriptions;
-		localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+		if (data.subscriptions) {
+			subscriptions = data.subscriptions;
+			localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+		}
+		if (data.pocket) {
+			pocket = data.pocket;
+			localStorage.setItem('pocket', JSON.stringify(pocket));
+			if (pocket.username) {
+				Pebble.showSimpleNotificationOnPebble('Readebble', 'Hi ' + pocket.username + '! You are now logged in to Pocket!\n\nHold the select button to add a story to your Pocket.');
+			}
+		}
 		sendSubscriptions();
 	}
 });

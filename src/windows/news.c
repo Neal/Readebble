@@ -10,6 +10,7 @@ static char summary[2048];
 
 static void request_data();
 static void back_single_click_handler(ClickRecognizerRef recognizer, void *context);
+static void select_long_click_handler(ClickRecognizerRef recognizer, void *context);
 static void click_config_provider(void *context);
 static void window_refresh();
 
@@ -91,8 +92,22 @@ static void back_single_click_handler(ClickRecognizerRef recognizer, void *conte
 	window_stack_pop(true);
 }
 
+static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
+	Tuplet pocket_tuple = TupletInteger(KEY_POCKET, 1);
+	Tuplet index_tuple = TupletInteger(KEY_INDEX, headline.index);
+	DictionaryIterator *iter;
+	app_message_outbox_begin(&iter);
+	if (iter == NULL)
+		return;
+	dict_write_tuplet(iter, &pocket_tuple);
+	dict_write_tuplet(iter, &index_tuple);
+	dict_write_end(iter);
+	app_message_outbox_send();
+}
+
 static void click_config_provider(void *context) {
 	window_single_click_subscribe(BUTTON_ID_BACK, back_single_click_handler);
+	window_long_click_subscribe(BUTTON_ID_SELECT, 500, select_long_click_handler, NULL);
 }
 
 static void window_refresh() {
