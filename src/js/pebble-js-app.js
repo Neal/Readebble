@@ -1,6 +1,6 @@
-var pocket = JSON.parse(localStorage.getItem('pocket')) || {};
-var subscriptions = JSON.parse(localStorage.getItem('subscriptions')) || [];
-var headlines = [];
+var subscriptions = [], headlines = [], pocket = {};
+try { subscriptions = JSON.parse(localStorage.getItem('subscriptions')); } catch (e) {}
+try { pocket = JSON.parse(localStorage.getItem('pocket')); } catch (e) {}
 
 var appMessageQueue = {
 	queue: [],
