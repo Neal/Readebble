@@ -5,8 +5,10 @@ $(document).bind('pageinit', function() {
 
 	var data = /data=([^&|^\/]*)/.exec(location.search);
 	if (data && data[1]) {
-		var d = JSON.parse(decodeURIComponent(data[1]));
-		subscriptions = d.subscriptions;
+		try {
+			var d = JSON.parse(decodeURIComponent(data[1]));
+			subscriptions = d.subscriptions;
+		} catch (e) {}
 	}
 
 	$.each(subscriptions, function(index, subscription) {
