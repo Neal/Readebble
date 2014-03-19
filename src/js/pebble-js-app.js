@@ -112,6 +112,7 @@ function sendSubscriptions() {
 }
 
 Pebble.addEventListener('ready', function(e) {
+	if (!(subscriptions instanceof Array)) subscriptions = [];
 	sendSubscriptions();
 });
 
