@@ -151,7 +151,7 @@ Pebble.addEventListener('appmessage', function(e) {
 
 Pebble.addEventListener('showConfiguration', function() {
 	var data = {subscriptions: subscriptions};
-	var uri = 'http://neal.github.io/Readebble/index.html?data=' + encodeURIComponent(JSON.stringify(data));
+	var uri = 'https://ineal.me/pebble/readebble/configuration/?data=' + encodeURIComponent(JSON.stringify(data));
 	Pebble.openURL(uri);
 });
 
