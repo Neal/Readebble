@@ -1,4 +1,4 @@
-var subscriptions = [], headlines = [], pocket = {};
+var subscriptions = [], headlines = [], pocket = {}, subscription = {};
 try { subscriptions = JSON.parse(localStorage.getItem('subscriptions')); } catch (e) {}
 try { pocket = JSON.parse(localStorage.getItem('pocket')); } catch (e) {}
 
@@ -56,8 +56,25 @@ function addToPocket(headline) {
 	xhr.send(null);
 }
 
-function summarize(headline) {
+function summarize(index) {
+	var headline = headlines[index];
 	var url = headline.link || '';
+
+	if (subscription.use_description) {
+		try {
+			var title = headline.title || '';
+			var summary = headline.content.replace(/(<([^>]+)>)/ig, '').replace(/(\r\n|\n|\r)/gm, '').replace(/ +(?= )/g,'').substring(0,2000);
+			for (var i = 0; i <= Math.floor(summary.length/appMessageQueue.maxBuffer); i++) {
+				appMessageQueue.add({summary: summary.substring(i * appMessageQueue.maxBuffer, i * appMessageQueue.maxBuffer + appMessageQueue.maxBuffer)});
+			}
+			appMessageQueue.add({summary: true, title: title.substring(0,64)});
+		} catch(e) {
+			appMessageQueue.add({summary: true, title: 'Failed to summarize!'});
+		}
+		appMessageQueue.send();
+		return;
+	}
+
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', 'http://clipped.me/algorithm/clippedapi.php?url=' + decodeURIComponent(url), true);
 	xhr.onload = function() {
@@ -81,7 +98,7 @@ function summarize(headline) {
 	xhr.send(null);
 }
 
-function fetchHeadlines(subscription) {
+function fetchHeadlines() {
 	appMessageQueue.clear();
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', 'https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=30&q=' + encodeURIComponent(subscription.url), true);
@@ -121,9 +138,10 @@ Pebble.addEventListener('appmessage', function(e) {
 	if (e.payload.pocket) {
 		addToPocket(headlines[e.payload.index]);
 	} else if (e.payload.summary) {
-		summarize(headlines[e.payload.index]);
+		summarize(e.payload.index);
 	} else if (e.payload.headline) {
-		fetchHeadlines(subscriptions[e.payload.index]);
+		subscription = subscriptions[e.payload.index];
+		fetchHeadlines();
 	} else if (e.payload.subscription) {
 		sendSubscriptions();
 	} else {
