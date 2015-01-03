@@ -1,21 +1,8 @@
 #include <pebble.h>
-#include "appmessage.h"
-#include "settings.h"
-#include "windows/subscriptions.h"
-
-static void init(void) {
-	appmessage_init();
-	settings_load();
-	subscriptions_init();
-}
-
-static void deinit(void) {
-	settings_save();
-	subscriptions_destroy();
-}
+#include "rss.h"
 
 int main(void) {
-	init();
+	rss_init();
 	app_event_loop();
-	deinit();
+	rss_deinit();
 }

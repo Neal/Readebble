@@ -4,19 +4,21 @@
 	"longName": "Readebble",
 	"companyName": "Neal",
 	"versionCode": 1,
-	"versionLabel": "1.1.4",
+	"versionLabel": "2.0",
 	"capabilities": [ "configurable" ],
 	"watchapp": {
 		"watchface": false
 	},
 	"appKeys": {
-		"subscription": 0,
-		"headline": 1,
+		"type": 0,
+		"method": 1,
 		"index": 2,
-		"title": 3,
-		"summary": 4,
-		"pocket": 5
+		"title": 3
 	},
+	"config": {
+		"keen": { "projectId": "54532b53383144606491d740", "writeKey": "3d2051dfda71165e1f4693d7ad0787911713fcc4156da4556fb3211c4aee9efa6b7a76b5078e785565a4554b18186ed83dd8bcb59eeaf7931f53a576b2fc2b69cb9c936fb97ef1c83d79239165e0b1682ad56887ad3031ca476b9ed536a9d1edfb129ff85dd3193cc43e2b0308024b97" }
+	},
+	"debug": true,
 	"resources": {
 		"media": [
 			{

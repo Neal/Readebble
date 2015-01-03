@@ -1,0 +1,19 @@
+{
+	"TYPE": [
+		"ERROR",
+		"SUBSCRIPTION",
+		"HEADLINE",
+		"STORY"
+	],
+	"METHOD": [
+		"ERROR",
+		"SIZE",
+		"DATA",
+		"REQUESTSUBSCRIPTIONS",
+		"REQUESTHEADLINES",
+		"REQUESTSTORY",
+		"ADDTOPOCKET",
+		"BUFFERSIZE",
+		"READY"
+	]
+}
