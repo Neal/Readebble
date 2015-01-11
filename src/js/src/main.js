@@ -95,7 +95,7 @@ Readebble.addToPocket = function() {
 	if (!Readebble.pocket.access_token) return Pebble.showSimpleNotificationOnPebble('Readebble', 'No Pocket account found. Please log in to your Pocket account via the Pebble mobile app.');
 	var url = 'https://ineal.me/pebble/readebble/pocket/add';
 	var data = { access_token: Readebble.pocket.access_token, url: Readebble.currentHeadline.link };
-	http('POST', url, data, null, function (e) {
+	http('POST', url, serialize(data), null, function (e) {
 		var res = JSON.parse(e.responseText);
 		debugLog(res);
 		if (res.item && res.status == 1) {
