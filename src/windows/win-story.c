@@ -73,7 +73,7 @@ static void window_load(Window *window) {
 	});
 	scroll_layer_add_to_window(scroll_layer, window);
 
-	title_text_layer = text_layer_create(GRect(2, -2, 140, 96));
+	title_text_layer = text_layer_create(GRect(3, -2, 140, 96));
 	text_layer_set_colors(title_text_layer, settings()->story_font_color ? GColorWhite : GColorBlack, GColorClear);
 	text_layer_set_font(title_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	text_layer_set_text(title_text_layer, headlines_get_current()->title);
@@ -83,7 +83,7 @@ static void window_load(Window *window) {
 
 	text_layer_set_size(title_text_layer, title_layer_size);
 
-	story_text_layer = text_layer_create(GRect(2, title_layer_size.h, 140, 1024));
+	story_text_layer = text_layer_create(GRect(3, title_layer_size.h, 140, 1024));
 	text_layer_set_colors(story_text_layer, settings()->story_font_color ? GColorWhite : GColorBlack, GColorClear);
 	text_layer_set_font(story_text_layer, fonts_get_system_font(settings()->story_font_size ? FONT_KEY_GOTHIC_24_BOLD : FONT_KEY_GOTHIC_18_BOLD));
 	text_layer_set_text(story_text_layer, "Loading...");
