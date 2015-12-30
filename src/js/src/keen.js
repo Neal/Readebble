@@ -1,6 +1,6 @@
 var Keen = {
 	addEvent: function(name, data) {
-		if (!data || !data instanceof Object) data = {};
+		if ((!data) || !(data instanceof Object)) data = {};
 		data.app = { name: AppInfo.shortName, version: AppInfo.versionLabel, uuid: AppInfo.uuid };
 		data.user = { accountToken: Pebble.getAccountToken() };
 		if (AppInfo.debug) {

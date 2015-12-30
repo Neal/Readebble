@@ -10,8 +10,8 @@ Readebble.bufferSize = 440;
 Readebble.init = function() {
 	Readebble.subscriptions = JSON.parse(localStorage.getItem('subscriptions')) || [];
 	Readebble.pocket = JSON.parse(localStorage.getItem('pocket')) || {};
-	if (!Readebble.subscriptions instanceof Array) Readebble.subscriptions = [];
-	if (!Readebble.pocket instanceof Object) Readebble.pocket = {};
+	if (!(Readebble.subscriptions instanceof Array)) Readebble.subscriptions = [];
+	if (!(Readebble.pocket instanceof Object)) Readebble.pocket = {};
 	Readebble.sendSubscriptions();
 	setTimeout(function() { Keen.addEvent('init', { subscriptions: { count: Readebble.subscriptions.length }, hasPocketToken: (Readebble.pocket.access_token !== 'undefined') }); }, 100);
 };
