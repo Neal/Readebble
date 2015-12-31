@@ -23,7 +23,7 @@ Readebble.sendError = function(type, err) {
 
 Readebble.sendSubscriptions = function() {
 	if (!this.subscriptions.length) {
-		return Readebble.sendError(TYPE.SUBSCRIPTION, 'No subscriptions found. Use the app settings in the Pebble mobile app to add subscriptions.');
+		return Readebble.sendError(TYPE.SUBSCRIPTION, 'No feeds configured');
 	}
 	appMessageQueue.send({type:TYPE.SUBSCRIPTION, method:METHOD.SIZE, index:Readebble.subscriptions.length});
 	for (var i = 0; i < Readebble.subscriptions.length; i++) {

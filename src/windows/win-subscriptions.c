@@ -6,6 +6,11 @@
 #include "win-headlines.h"
 #include "win-settings.h"
 
+#define MENU_NUM_SECTIONS (1)
+#define TEXT_BORDER_INSET (16)
+
+#define GRECT_EDGE_TRIM(RECT, AMOUNT) RECT.origin.x += AMOUNT; RECT.size.w -= (AMOUNT * 2);
+
 static uint16_t menu_get_num_sections_callback(struct MenuLayer *menu_layer, void *callback_context);
 static uint16_t menu_get_num_rows_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context);
 static int16_t menu_get_header_height_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context);
@@ -16,9 +21,32 @@ static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_i
 static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
 static void window_load(Window *window);
 static void window_unload(Window *window);
+int menu_item_count();
+int menu_item_settings_pos();
 
 static Window *window = NULL;
 static MenuLayer *menu_layer = NULL;
+#ifdef PBL_SDK_3
+static StatusBarLayer *s_status_bar;
+#endif
+
+int menu_item_count() {
+	int items;
+	items = subscriptions_count() + 1;
+	if (items < 2) {
+		items = 2;
+	}
+	return items;
+}
+
+int menu_item_settings_pos() {
+	int position;
+	position = subscriptions_count();
+	if (position < 1) {
+		position = 1;
+	}
+	return position;
+}
 
 void win_subscriptions_init(void) {
 	window = window_create();
@@ -41,50 +69,46 @@ void win_subscriptions_reload_data_and_mark_dirty(void) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
 static uint16_t menu_get_num_sections_callback(struct MenuLayer *menu_layer, void *callback_context) {
-	return 2;
+	return MENU_NUM_SECTIONS;
 }
 
 static uint16_t menu_get_num_rows_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
-	if (section_index == 1) return 1;
-	return subscriptions_count() ? subscriptions_count() : 1;
+	return menu_item_count();
 }
 
 static int16_t menu_get_header_height_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
-	return MENU_CELL_BASIC_HEADER_HEIGHT;
+	return 0;
 }
 
 static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-	if (cell_index->section == 1) return MENU_CELL_BASIC_CELL_HEIGHT;
+	if (cell_index->row == menu_item_settings_pos()) return MENU_CELL_BASIC_CELL_HEIGHT;
 	if (subscriptions_get_error()) {
-		return graphics_text_layout_get_content_size(subscriptions_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
+		GRect bounds = layer_get_bounds(menu_layer_get_layer(menu_layer));
+		GRECT_EDGE_TRIM (bounds, TEXT_BORDER_INSET)
+		return graphics_text_layout_get_content_size(subscriptions_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), bounds, GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
 	}
 	return MENU_CELL_BASIC_CELL_HEIGHT;
 }
 
 static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context) {
-	switch (section_index) {
-		case 0:
-			menu_cell_basic_header_draw(ctx, cell_layer, "Readebble");
-			break;
-		case 1:
-			menu_cell_basic_header_draw(ctx, cell_layer, "Other");
-			break;
-	}
+	// Do nothing
 }
 
 static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
-	if (cell_index->section == 1) {
+	if (cell_index->row == menu_item_settings_pos()) {
 		menu_cell_basic_draw(ctx, cell_layer, "Settings", NULL, NULL);
 	} else if (subscriptions_get_error()) {
-		graphics_context_set_text_color(ctx, GColorBlack);
-		graphics_draw_text(ctx, subscriptions_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+		//graphics_context_set_text_color(ctx, GColorBlack);
+		GRect bounds = layer_get_bounds(cell_layer);
+		GRECT_EDGE_TRIM (bounds, TEXT_BORDER_INSET)
+		graphics_draw_text(ctx, subscriptions_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), bounds, GTextOverflowModeFill, PBL_IF_ROUND_ELSE (GTextAlignmentCenter, GTextAlignmentLeft), NULL);
 	} else {
 		menu_cell_basic_draw(ctx, cell_layer, subscriptions_get(cell_index->row)->title, NULL, NULL);
 	}
 }
 
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-	if (cell_index->section == 1) {
+	if (cell_index->row == menu_item_settings_pos()) {
 		return win_settings_push();
 	}
 	if (!subscriptions_count()) return;
@@ -97,6 +121,8 @@ static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *c
 }
 
 static void window_load(Window *window) {
+	Layer *window_layer = window_get_root_layer(window);
+
 	menu_layer = menu_layer_create_fullscreen(window);
 	menu_layer_set_callbacks(menu_layer, NULL, (MenuLayerCallbacks) {
 		.get_num_sections = menu_get_num_sections_callback,
@@ -110,8 +136,27 @@ static void window_load(Window *window) {
 	});
 	menu_layer_set_click_config_onto_window(menu_layer, window);
 	menu_layer_add_to_window(menu_layer, window);
+
+#ifdef PBL_SDK_3
+	// Set up the status bar if it's needed
+	s_status_bar = status_bar_layer_create();
+	layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar));
+	status_bar_layer_set_colors(s_status_bar, GColorWhite, GColorBlack);
+#endif
+
+#ifdef PBL_COLOR
+	menu_layer_set_normal_colors(menu_layer, GColorWhite, GColorBlack);
+	menu_layer_set_highlight_colors(menu_layer, GColorOrange, GColorWhite);
+#endif
 }
 
 static void window_unload(Window *window) {
 	menu_layer_destroy_safe(menu_layer);
+
+#ifdef PBL_SDK_3
+	// Destroy the status bar if there is one
+	status_bar_layer_destroy(s_status_bar);
+#endif
 }
+
+
