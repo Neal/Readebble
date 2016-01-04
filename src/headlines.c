@@ -10,10 +10,12 @@ static Headline *headlines = NULL;
 
 static uint8_t num_headlines = 0;
 static uint8_t current_headline = 0;
+static uint8_t progress = 0;
 
 static char *error = NULL;
 
 void headlines_init(void) {
+	progress = 0;
 	win_headlines_init();
 }
 
@@ -33,6 +35,7 @@ void headlines_in_received_handler(DictionaryIterator *iter) {
 			if (!tuple) break;
 			error = malloc(tuple->length);
 			strncpy(error, tuple->value->cstring, tuple->length);
+			progress = 100;
 			headlines_reload_data_and_mark_dirty();
 			break;
 		}
@@ -41,6 +44,7 @@ void headlines_in_received_handler(DictionaryIterator *iter) {
 			tuple = dict_find(iter, APP_KEY_INDEX);
 			if (!tuple) break;
 			num_headlines = tuple->value->uint8;
+			progress = (num_headlines == 0 ? 100 : 0);
 			headlines = malloc(sizeof(Headline) * num_headlines);
 			if (headlines == NULL) num_headlines = 0;
 			break;
@@ -55,6 +59,7 @@ void headlines_in_received_handler(DictionaryIterator *iter) {
 			if (tuple) {
 				strncpy(headline->title, tuple->value->cstring, sizeof(headline->title) - 1);
 			}
+			progress = ((int)(index + 1) * 100) / num_headlines;
 			LOG("headline: %d '%s'", headline->index, headline->title);
 			headlines_reload_data_and_mark_dirty();
 			break;
@@ -64,6 +69,10 @@ void headlines_in_received_handler(DictionaryIterator *iter) {
 
 void headlines_reload_data_and_mark_dirty() {
 	win_headlines_reload_data_and_mark_dirty();
+}
+
+uint8_t headlines_progress() {
+	return progress;
 }
 
 uint8_t headlines_count() {
@@ -105,3 +114,4 @@ void headlines_request() {
 	app_message_outbox_send();
 	headlines_reload_data_and_mark_dirty();
 }
+
