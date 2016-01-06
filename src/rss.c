@@ -101,7 +101,13 @@ static void timer_callback(void *data) {
 	DictionaryIterator *iter;
 	app_message_outbox_begin(&iter);
 	dict_write_uint8(iter, APP_KEY_METHOD, KEY_METHOD_BUFFERSIZE);
-	dict_write_uint32(iter, APP_KEY_INDEX, app_message_inbox_size_maximum());
+	//dict_write_uint32(iter, APP_KEY_INDEX, app_message_inbox_size_maximum());
+	// Reducing the size of the buffer allows the story to be sent in chunks
+	uint32_t buffersize = 128;
+	if (buffersize > app_message_inbox_size_maximum()) {
+		buffersize = app_message_inbox_size_maximum();
+	}
+	dict_write_uint32(iter, APP_KEY_INDEX, buffersize);
 	dict_write_end(iter);
 	app_message_outbox_send();
 }

@@ -45,6 +45,7 @@ Readebble.sendHeadlines = function() {
 
 Readebble.sendStory = function(story) {
 	var maxStoryBuffer = Readebble.bufferSize - 32;
+	appMessageQueue.send({type:TYPE.STORY, method:METHOD.SIZE, index:story.length});
 	for (var i = 0; i <= Math.floor(story.length/maxStoryBuffer); i++) {
 		appMessageQueue.send({type:TYPE.STORY, method:METHOD.DATA, title:story.substring(i * maxStoryBuffer, i * maxStoryBuffer + maxStoryBuffer)});
 	}

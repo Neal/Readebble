@@ -2,7 +2,6 @@
 #include "layers/progress_bar.h"
 
 typedef struct _ProgressBarData {
-	//Layer *layer;
 	uint8_t progress;
 	ProgressBarLayerUpdateProc update_proc;
 	GColor complete;
@@ -12,11 +11,10 @@ typedef struct _ProgressBarData {
 static void progress_bar_layer_update_proc(ProgressBarLayer *progress_bar_layer, GContext *ctx);
 float math_sqrt(const float num);
 
-
 ProgressBarLayer * progress_bar_layer_create_fullscreen(Window * window) {
-	GRect bounds = layer_get_bounds(window_get_root_layer(window));
+	GRect window_bounds = layer_get_bounds(window_get_root_layer(window));
 	GPoint start = GPoint(0, STATUS_BAR_LAYER_HEIGHT - 2);
-	int16_t width = bounds.size.w;
+	int16_t width = window_bounds.size.w;
 	
 	ProgressBarLayer *progress_bar_layer = progress_bar_layer_create(start, width);
 
@@ -75,8 +73,8 @@ void progress_bar_layer_set_pos(ProgressBarLayer * progress_bar_layer, int16_t y
 	int16_t width = (int16_t)math_sqrt((radius * radius) - (offset * offset));
 
 	GRect layer_bounds = (GRect){
-		.origin = GPoint((window_bounds.size.w / 2) - width + 4, y),
-		.size = GSize(width * 2 - 8, 1)
+		.origin = GPoint((window_bounds.size.w / 2) - width, y),
+		.size = GSize(width * 2, 1)
 	};
 	layer_set_frame((Layer *)progress_bar_layer, layer_bounds);
 }
@@ -87,10 +85,6 @@ void progress_bar_layer_set_progress(ProgressBarLayer * progress_bar_layer, uint
 	progress_bar_data->progress = percent;
 	layer_mark_dirty((Layer *)progress_bar_layer);
 }
-
-//Layer * progress_bar_layer_get_layer(ProgressBarLayer * progress_bar_layer) {
-//	return (Layer *)progress_bar_layer;
-//}
 
 void progress_bar_layer_set_colors(ProgressBarLayer * progress_bar_layer, GColor complete, GColor remaining) {
 	ProgressBarData *progress_bar_data = (ProgressBarData *)layer_get_data((Layer *)progress_bar_layer);

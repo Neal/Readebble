@@ -7,6 +7,7 @@
 #include "rss.h"
 #include "win-story.h"
 #include "layers/progress_bar.h"
+#include "layers/title_bar.h"
 
 #define TEXT_BORDER_INSET (16)
 
@@ -26,7 +27,7 @@ static Window *window = NULL;
 static MenuLayer *menu_layer = NULL;
 static ProgressBarLayer *s_progress_bar_layer;
 #ifdef PBL_SDK_3
-static TextLayer *s_status_bar;
+static TitleBarLayer *s_status_bar;
 #endif
 
 void win_headlines_init(void) {
@@ -99,8 +100,8 @@ static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *c
 }
 
 static void window_load(Window *window) {
-	Layer *window_layer = window_get_root_layer(window);
-	GRect bounds = layer_get_bounds(window_layer);
+	//Layer *window_layer = window_get_root_layer(window);
+	//GRect bounds = layer_get_bounds(window_layer);
 
 	menu_layer = menu_layer_create_fullscreen(window);
 	menu_layer_set_callbacks(menu_layer, NULL, (MenuLayerCallbacks) {
@@ -119,21 +120,9 @@ static void window_load(Window *window) {
 
 #ifdef PBL_SDK_3
 	// Set up the status bar if it's needed
-	GRect bar_bounds = bounds;
-	bar_bounds.size.h = STATUS_BAR_LAYER_HEIGHT + 12;
-	s_status_bar = text_layer_create(bar_bounds);
-	text_layer_set_text_alignment(s_status_bar, GTextAlignmentCenter);
-	text_layer_set_colors(s_status_bar, GColorBlack, GColorPastelYellow);
-	text_layer_set_text(s_status_bar, subscriptions_get_current()->title);
-	layer_add_child(window_layer, text_layer_get_layer(s_status_bar));
-	text_layer_enable_screen_text_flow_and_paging(s_status_bar, 2);
-	GSize size = text_layer_get_content_size(s_status_bar);
-	size.h += 4;
-	size.w = bounds.size.w;
-	if (size.h > STATUS_BAR_SIZE_MAX) {
-		size.h = STATUS_BAR_SIZE_MAX;
-	}
-	text_layer_set_size(s_status_bar, size);
+	s_status_bar = title_bar_layer_create_fullscreen(window);
+	title_bar_layer_set_colors(s_status_bar, GColorBlack, GColorPastelYellow);
+	title_bar_layer_set_text(s_status_bar, subscriptions_get_current()->title);
 #endif
 
 #ifdef PBL_COLOR
@@ -143,8 +132,8 @@ static void window_load(Window *window) {
 
 	// Set up the progress layer
 	s_progress_bar_layer = progress_bar_layer_create_fullscreen(window);
-
-	progress_bar_layer_set_pos(s_progress_bar_layer, STATUS_BAR_LAYER_HEIGHT);
+	progress_bar_layer_set_pos(s_progress_bar_layer, TITLE_BAR_DEFAULT_HEIGHT);
+	progress_bar_layer_set_colors(s_progress_bar_layer, GColorOrange, GColorWhite);
 }
 
 static void window_unload(Window *window) {
@@ -152,7 +141,7 @@ static void window_unload(Window *window) {
 
 #ifdef PBL_SDK_3
 	// Destroy the status bar if there is one
-	text_layer_destroy(s_status_bar);
+	title_bar_layer_destroy(s_status_bar);
 #endif
 
 	// Destroy the progress bar
