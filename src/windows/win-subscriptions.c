@@ -26,8 +26,8 @@ int menu_item_settings_pos();
 
 static Window *window = NULL;
 static MenuLayer *menu_layer = NULL;
-#ifdef PBL_SDK_3
 static StatusBarLayer *s_status_bar;
+#ifdef PBL_ROUND
 static TextLayer *s_lower_bar;
 #endif
 
@@ -97,7 +97,9 @@ static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, ui
 
 static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
 	if (cell_index->row == menu_item_settings_pos()) {
+#ifdef PBL_COLOR
 		graphics_context_set_text_color(ctx, GColorBlue);
+#endif
 		menu_cell_basic_draw(ctx, cell_layer, "Settings", NULL, NULL);
 	} else if (subscriptions_get_error()) {
 		//graphics_context_set_text_color(ctx, GColorBlack);
@@ -124,7 +126,9 @@ static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *c
 
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
+#ifdef PBL_ROUND
 	GRect bounds = layer_get_bounds(window_layer);
+#endif
 
 	menu_layer = menu_layer_create_fullscreen(window);
 	menu_layer_set_callbacks(menu_layer, NULL, (MenuLayerCallbacks) {
@@ -140,12 +144,12 @@ static void window_load(Window *window) {
 	menu_layer_set_click_config_onto_window(menu_layer, window);
 	menu_layer_add_to_window(menu_layer, window);
 
-#ifdef PBL_SDK_3
 	// Set up the status bar if it's needed
 	s_status_bar = status_bar_layer_create();
 	layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar));
 	status_bar_layer_set_colors(s_status_bar, GColorWhite, GColorBlack);
 
+#ifdef PBL_ROUND
 	// Set up the lower message bar
 	const GEdgeInsets message_insets = {.top = bounds.size.h - STATUS_BAR_LAYER_HEIGHT};
 	s_lower_bar = text_layer_create(grect_inset(bounds, message_insets));
@@ -153,6 +157,11 @@ static void window_load(Window *window) {
 	text_layer_set_colors(s_lower_bar, GColorBlack, GColorWhite);
 	text_layer_set_text(s_lower_bar, "");
 	layer_add_child(window_layer, text_layer_get_layer(s_lower_bar));
+#else
+	GRect menu_bounds = layer_get_bounds(menu_layer_get_layer(menu_layer));
+	menu_bounds.origin.y += STATUS_BAR_LAYER_HEIGHT;
+	menu_bounds.size.h -= STATUS_BAR_LAYER_HEIGHT * 2;
+	layer_set_bounds(menu_layer_get_layer(menu_layer), menu_bounds);
 #endif
 
 #ifdef PBL_COLOR
@@ -164,9 +173,9 @@ static void window_load(Window *window) {
 static void window_unload(Window *window) {
 	menu_layer_destroy_safe(menu_layer);
 
-#ifdef PBL_SDK_3
 	// Destroy the status bar if there is one
 	status_bar_layer_destroy(s_status_bar);
+#ifdef PBL_ROUND
 	text_layer_destroy(s_lower_bar);
 #endif
 }
