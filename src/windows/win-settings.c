@@ -98,13 +98,7 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 			strncpy(value, settings()->story_font_color ? "White": "Black", sizeof(value));
 			break;
 	}
-#ifdef PBL_RECT
-	graphics_context_set_text_color(ctx, GColorBlack);
-	graphics_draw_text(ctx, settings_labels[cell_index->row], fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(4, 2, 136, 28), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
-	graphics_draw_text(ctx, value, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 7, 134, 24), GTextOverflowModeTrailingEllipsis, GTextAlignmentRight, NULL);
-#else
 	menu_cell_basic_draw(ctx, cell_layer, settings_labels[cell_index->row], value, NULL);
-#endif
 }
 
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
@@ -124,7 +118,9 @@ static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_i
 
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
+#ifdef PBL_ROUND
 	GRect bounds = layer_get_bounds(window_layer);
+#endif
 
 	menu_layer = menu_layer_create_fullscreen(window);
 	menu_layer_set_callbacks(menu_layer, NULL, (MenuLayerCallbacks) {
@@ -139,12 +135,12 @@ static void window_load(Window *window) {
 	menu_layer_set_click_config_onto_window(menu_layer, window);
 	menu_layer_add_to_window(menu_layer, window);
 
-#ifdef PBL_SDK_3
 	// Set up the status bar if it's needed
 	s_status_bar = status_bar_layer_create();
 	layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar));
 	status_bar_layer_set_colors(s_status_bar, GColorWhite, GColorBlack);
 
+#ifdef PBL_ROUND
 	// Set up the lower message bar
 	const GEdgeInsets message_insets = {.top = bounds.size.h - STATUS_BAR_LAYER_HEIGHT};
 	s_lower_bar = text_layer_create(grect_inset(bounds, message_insets));
@@ -152,6 +148,11 @@ static void window_load(Window *window) {
 	text_layer_set_colors(s_lower_bar, GColorBlack, GColorWhite);
 	text_layer_set_text(s_lower_bar, "");
 	layer_add_child(window_layer, text_layer_get_layer(s_lower_bar));
+#else
+	GRect menu_bounds = layer_get_bounds(menu_layer_get_layer(menu_layer));
+	menu_bounds.origin.y += STATUS_BAR_LAYER_HEIGHT;
+	menu_bounds.size.h -= STATUS_BAR_LAYER_HEIGHT * 2;
+	layer_set_bounds(menu_layer_get_layer(menu_layer), menu_bounds);
 #endif
 
 #ifdef PBL_COLOR
