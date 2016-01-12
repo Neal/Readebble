@@ -24,6 +24,8 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
 static void window_load(Window *window);
 static void window_unload(Window *window);
+static void window_set_colors(Window * window);
+static void window_appear(Window *window);
 
 static Window *window = NULL;
 static MenuLayer *menu_layer = NULL;
@@ -43,6 +45,7 @@ void win_settings_init(void) {
 	window_set_window_handlers(window, (WindowHandlers) {
 		.load = window_load,
 		.unload = window_unload,
+		.appear = window_appear,
 	});
 }
 
@@ -86,16 +89,16 @@ static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, ui
 }
 
 static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
-	char value[6] = "";
+	char const *value = NULL;
 	switch (cell_index->row) {
 		case MENU_ROW_HEADLINES_SIZE:
-			strncpy(value, settings()->headlines_font_size ? "Large": "Small", sizeof(value));
+			value = settings_get_headlines_font_size_string();
 			break;
 		case MENU_ROW_SUMMARY_SIZE:
-			strncpy(value, settings()->story_font_size ? "Large": "Small", sizeof(value));
+			value = settings_get_story_font_size_string();
 			break;
 		case MENU_ROW_SUMMARY_COLOR:
-			strncpy(value, settings()->story_font_color ? "White": "Black", sizeof(value));
+			value = settings_get_story_font_color_string();
 			break;
 	}
 	menu_cell_basic_draw(ctx, cell_layer, settings_labels[cell_index->row], value, NULL);
@@ -104,16 +107,21 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 	switch (cell_index->row) {
 		case MENU_ROW_HEADLINES_SIZE:
-			settings()->headlines_font_size = !settings()->headlines_font_size;
+			settings_bump_headlines_font_size();
 			break;
 		case MENU_ROW_SUMMARY_SIZE:
-			settings()->story_font_size = !settings()->story_font_size;
+			settings_bump_story_font_size();
 			break;
 		case MENU_ROW_SUMMARY_COLOR:
-			settings()->story_font_color = !settings()->story_font_color;
+			settings_bump_story_font_color();
+			window_set_colors(window);
 			break;
 	}
 	menu_layer_reload_data(menu_layer);
+}
+
+static void window_appear(Window *window) {
+	window_set_colors(window);
 }
 
 static void window_load(Window *window) {
@@ -138,26 +146,19 @@ static void window_load(Window *window) {
 	// Set up the status bar if it's needed
 	s_status_bar = status_bar_layer_create();
 	layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar));
-	status_bar_layer_set_colors(s_status_bar, GColorWhite, GColorBlack);
 
 #ifdef PBL_ROUND
 	// Set up the lower message bar
 	const GEdgeInsets message_insets = {.top = bounds.size.h - STATUS_BAR_LAYER_HEIGHT};
 	s_lower_bar = text_layer_create(grect_inset(bounds, message_insets));
 	text_layer_set_text_alignment(s_lower_bar, GTextAlignmentCenter);
-	text_layer_set_colors(s_lower_bar, GColorBlack, GColorWhite);
 	text_layer_set_text(s_lower_bar, "");
 	layer_add_child(window_layer, text_layer_get_layer(s_lower_bar));
 #else
-	GRect menu_bounds = layer_get_bounds(menu_layer_get_layer(menu_layer));
+	GRect menu_bounds = layer_get_frame(menu_layer_get_layer(menu_layer));
 	menu_bounds.origin.y += STATUS_BAR_LAYER_HEIGHT;
-	menu_bounds.size.h -= STATUS_BAR_LAYER_HEIGHT * 2;
-	layer_set_bounds(menu_layer_get_layer(menu_layer), menu_bounds);
-#endif
-
-#ifdef PBL_COLOR
-	menu_layer_set_normal_colors(menu_layer, GColorWhite, GColorBlack);
-	menu_layer_set_highlight_colors(menu_layer, GColorOrange, GColorWhite);
+	menu_bounds.size.h -= STATUS_BAR_LAYER_HEIGHT;
+	scroll_layer_set_frame(menu_layer_get_scroll_layer(menu_layer), menu_bounds);
 #endif
 }
 
@@ -168,6 +169,15 @@ static void window_unload(Window *window) {
 	// Destroy the status bar if there is one
 	status_bar_layer_destroy(s_status_bar);
 	text_layer_destroy(s_lower_bar);
+#endif
+}
+
+static void window_set_colors(Window * window) {
+	status_bar_layer_set_colors(s_status_bar, settings_get_colors()->main_background, settings_get_colors()->main_text);
+	menu_layer_set_normal_colors(menu_layer, settings_get_colors()->main_background, settings_get_colors()->main_text);
+	menu_layer_set_highlight_colors(menu_layer, settings_get_colors()->selection_highlight, settings_get_colors()->inverted_text);
+#ifdef PBL_ROUND
+	text_layer_set_colors(s_lower_bar, settings_get_colors()->main_text, settings_get_colors()->main_background);
 #endif
 }
 

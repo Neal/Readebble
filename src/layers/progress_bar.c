@@ -9,7 +9,9 @@ typedef struct _ProgressBarData {
 } ProgressBarData;
 
 static void progress_bar_layer_update_proc(ProgressBarLayer *progress_bar_layer, GContext *ctx);
+#ifdef PBL_ROUND
 float math_sqrt(const float num);
+#endif
 
 ProgressBarLayer * progress_bar_layer_create_fullscreen(Window * window) {
 	GRect window_bounds = layer_get_bounds(window_get_root_layer(window));
@@ -68,9 +70,13 @@ void progress_bar_layer_destroy(ProgressBarLayer * progress_bar_layer) {
 void progress_bar_layer_set_pos(ProgressBarLayer * progress_bar_layer, int16_t y) {
 	GRect window_bounds = layer_get_bounds(window_get_root_layer(layer_get_window((Layer *)progress_bar_layer)));
 
+#ifdef PBL_ROUND
 	float radius = ((float)window_bounds.size.h / 2.0);
 	float offset = (radius - (float)y);
 	int16_t width = (int16_t)math_sqrt((radius * radius) - (offset * offset));
+#else
+	int16_t width = window_bounds.size.w / 2;
+#endif
 
 	GRect layer_bounds = (GRect){
 		.origin = GPoint((window_bounds.size.w / 2) - width, y),
@@ -131,6 +137,7 @@ static void progress_bar_layer_update_proc(Layer *layer, GContext *ctx) {
 	}
 }
 
+#ifdef PBL_ROUND
 // See https://forums.getpebble.com/discussion/comment/79122/#Comment_79122
 float math_sqrt(const float num) {
 	const uint MAX_STEPS = 40;
@@ -145,4 +152,5 @@ float math_sqrt(const float num) {
 	}
 	return answer;
 }
+#endif
 

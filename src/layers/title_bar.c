@@ -100,6 +100,11 @@ void title_bar_layer_set_height(TitleBarLayer * title_bar_layer, int16_t height)
 	title_bar_layer_centre_text_vertically(title_bar_layer);
 }
 
+int16_t title_bar_layer_get_height(TitleBarLayer * title_bar_layer) {
+	GRect layer_bounds = layer_get_bounds(title_bar_layer_get_layer(title_bar_layer));
+	return layer_bounds.size.h;
+}
+
 void title_bar_layer_set_colors(TitleBarLayer * title_bar_layer, GColor foreground, GColor background) {
 	TitleBarData *title_bar_data = (TitleBarData *)layer_get_data((Layer *)title_bar_layer);
 

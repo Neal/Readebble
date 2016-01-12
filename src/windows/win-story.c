@@ -21,12 +21,15 @@ static ScrollLayer *scroll_layer = NULL;
 static TextLayer *title_text_layer = NULL;
 static TextLayer *story_text_layer = NULL;
 static ProgressBarLayer *progress_bar_layer = NULL;
+static void window_set_colors(Window * window);
+static void window_appear(Window *window);
 
 void win_story_init(void) {
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
 		.load = window_load,
 		.unload = window_unload,
+		.appear = window_appear,
 	});
 }
 
@@ -79,21 +82,25 @@ static void click_config_provider(void *context) {
 	window_long_click_subscribe(BUTTON_ID_SELECT, 500, select_long_click_handler, NULL);
 }
 
+static void window_appear(Window *window) {
+	window_set_colors(window);
+}
+
 static void window_load(Window *window) {
 	//window_set_background_color(window, settings()->story_font_color ? GColorBlack : GColorWhite);
-	window_set_background_color(window, GColorWhite);
+	//window_set_background_color(window, GColorWhite);
 	GRect window_bounds = layer_get_bounds(window_get_root_layer(window));
 
 	story_text_layer = text_layer_create(window_bounds);
-	text_layer_set_colors(story_text_layer, GColorBlack, GColorWhite);
-	text_layer_set_font(story_text_layer, fonts_get_system_font(settings()->story_font_size ? FONT_KEY_GOTHIC_24 : FONT_KEY_GOTHIC_14));
+	//text_layer_set_colors(story_text_layer, GColorBlack, GColorWhite);
+	text_layer_set_font(story_text_layer, settings_get_story_body_font_size());
 	text_layer_set_text_alignment(story_text_layer, GTextAlignmentCenter);
 	text_layer_set_text(story_text_layer, "Loading...");
 
 
 	title_text_layer = text_layer_create(window_bounds);
-	text_layer_set_colors(title_text_layer, GColorBlack, GColorPastelYellow);
-	text_layer_set_font(title_text_layer, fonts_get_system_font(settings()->story_font_size ? FONT_KEY_GOTHIC_24_BOLD : FONT_KEY_GOTHIC_14_BOLD));
+	//text_layer_set_colors(title_text_layer, GColorBlack, GColorPastelYellow);
+	text_layer_set_font(title_text_layer, settings_get_story_title_font_size());
 	text_layer_set_text_alignment(title_text_layer, GTextAlignmentCenter);
 	text_layer_set_text(title_text_layer, headlines_get_current()->title);
 
@@ -168,7 +175,7 @@ static void window_load(Window *window) {
 	// Set up the progress layer
 	progress_bar_layer = progress_bar_layer_create_fullscreen(window);
 	progress_bar_layer_set_pos(progress_bar_layer, title_layer_size.h);
-	progress_bar_layer_set_colors(progress_bar_layer, GColorOrange, GColorWhite);
+	//progress_bar_layer_set_colors(progress_bar_layer, GColorOrange, GColorWhite);
 	progress_bar_layer_set_progress(progress_bar_layer, 0);
 	scroll_layer_add_child(scroll_layer, progress_bar_layer_get_layer(progress_bar_layer));
 }
@@ -180,5 +187,12 @@ static void window_unload(Window *window) {
 
 	// Destroy the progress bar
 	progress_bar_layer_destroy(progress_bar_layer);
+}
+
+static void window_set_colors(Window * window) {
+	window_set_background_color(window, settings_get_colors()->main_background);
+	text_layer_set_colors(story_text_layer, settings_get_colors()->main_text, settings_get_colors()->main_background);
+	text_layer_set_colors(title_text_layer, settings_get_colors()->title_bar_text, settings_get_colors()->title_bar_background);
+	progress_bar_layer_set_colors(progress_bar_layer, settings_get_colors()->progress_bar_complete, settings_get_colors()->progress_bar_remaining);
 }
 

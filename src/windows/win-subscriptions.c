@@ -5,6 +5,7 @@
 #include "rss.h"
 #include "win-headlines.h"
 #include "win-settings.h"
+#include "settings.h"
 
 #define MENU_NUM_SECTIONS (1)
 #define TEXT_BORDER_INSET (16)
@@ -23,6 +24,8 @@ static void window_load(Window *window);
 static void window_unload(Window *window);
 int menu_item_count();
 int menu_item_settings_pos();
+static void window_set_colors(Window * window);
+static void window_appear(Window *window);
 
 static Window *window = NULL;
 static MenuLayer *menu_layer = NULL;
@@ -54,6 +57,7 @@ void win_subscriptions_init(void) {
 	window_set_window_handlers(window, (WindowHandlers) {
 		.load = window_load,
 		.unload = window_unload,
+		.appear = window_appear,
 	});
 	window_stack_push(window, true);
 }
@@ -66,6 +70,9 @@ void win_subscriptions_reload_data_and_mark_dirty(void) {
 	if (!window_is_loaded(window)) return;
 	menu_layer_reload_data_and_mark_dirty(menu_layer);
 }
+
+
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
@@ -98,13 +105,15 @@ static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, ui
 static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
 	if (cell_index->row == menu_item_settings_pos()) {
 #ifdef PBL_COLOR
-		graphics_context_set_text_color(ctx, GColorBlue);
+		graphics_context_set_text_color(ctx, (menu_cell_layer_is_highlighted(cell_layer) ? settings_get_colors()->settings_inverted_text : settings_get_colors()->settings_text));
 #endif
 		menu_cell_basic_draw(ctx, cell_layer, "Settings", NULL, NULL);
 	} else if (subscriptions_get_error()) {
-		//graphics_context_set_text_color(ctx, GColorBlack);
 		GRect bounds = layer_get_bounds(cell_layer);
 		GRECT_EDGE_TRIM (bounds, TEXT_BORDER_INSET)
+		
+		graphics_context_set_text_color(ctx, (menu_cell_layer_is_highlighted(cell_layer) ? settings_get_colors()->inverted_text : settings_get_colors()->main_text));
+		
 		graphics_draw_text(ctx, subscriptions_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), bounds, GTextOverflowModeFill, PBL_IF_ROUND_ELSE (GTextAlignmentCenter, GTextAlignmentLeft), NULL);
 	} else {
 		menu_cell_basic_draw(ctx, cell_layer, subscriptions_get(cell_index->row)->title, NULL, NULL);
@@ -124,6 +133,10 @@ static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *c
 	rss_request_subscriptions();
 }
 
+static void window_appear(Window *window) {
+	window_set_colors(window);
+}
+
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 #ifdef PBL_ROUND
@@ -135,8 +148,8 @@ static void window_load(Window *window) {
 		.get_num_sections = menu_get_num_sections_callback,
 		.get_num_rows = menu_get_num_rows_callback,
 		.get_header_height = menu_get_header_height_callback,
-		.get_cell_height = menu_get_cell_height_callback,
 		.draw_header = menu_draw_header_callback,
+		.get_cell_height = menu_get_cell_height_callback,
 		.draw_row = menu_draw_row_callback,
 		.select_click = menu_select_callback,
 		.select_long_click = menu_select_long_callback,
@@ -147,26 +160,19 @@ static void window_load(Window *window) {
 	// Set up the status bar if it's needed
 	s_status_bar = status_bar_layer_create();
 	layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar));
-	status_bar_layer_set_colors(s_status_bar, GColorWhite, GColorBlack);
 
 #ifdef PBL_ROUND
 	// Set up the lower message bar
 	const GEdgeInsets message_insets = {.top = bounds.size.h - STATUS_BAR_LAYER_HEIGHT};
 	s_lower_bar = text_layer_create(grect_inset(bounds, message_insets));
 	text_layer_set_text_alignment(s_lower_bar, GTextAlignmentCenter);
-	text_layer_set_colors(s_lower_bar, GColorBlack, GColorWhite);
 	text_layer_set_text(s_lower_bar, "");
 	layer_add_child(window_layer, text_layer_get_layer(s_lower_bar));
 #else
-	GRect menu_bounds = layer_get_bounds(menu_layer_get_layer(menu_layer));
+	GRect menu_bounds = layer_get_frame(menu_layer_get_layer(menu_layer));
 	menu_bounds.origin.y += STATUS_BAR_LAYER_HEIGHT;
-	menu_bounds.size.h -= STATUS_BAR_LAYER_HEIGHT * 2;
-	layer_set_bounds(menu_layer_get_layer(menu_layer), menu_bounds);
-#endif
-
-#ifdef PBL_COLOR
-	menu_layer_set_normal_colors(menu_layer, GColorWhite, GColorBlack);
-	menu_layer_set_highlight_colors(menu_layer, GColorOrange, GColorWhite);
+	menu_bounds.size.h -= STATUS_BAR_LAYER_HEIGHT;
+	scroll_layer_set_frame(menu_layer_get_scroll_layer(menu_layer), menu_bounds);
 #endif
 }
 
@@ -180,4 +186,12 @@ static void window_unload(Window *window) {
 #endif
 }
 
+static void window_set_colors(Window * window) {
+	status_bar_layer_set_colors(s_status_bar, settings_get_colors()->main_background, settings_get_colors()->main_text);
+	menu_layer_set_normal_colors(menu_layer, settings_get_colors()->main_background, settings_get_colors()->main_text);
+	menu_layer_set_highlight_colors(menu_layer, settings_get_colors()->selection_highlight, settings_get_colors()->inverted_text);
+#ifdef PBL_ROUND
+	text_layer_set_colors(s_lower_bar, settings_get_colors()->main_text, settings_get_colors()->main_background);
+#endif
+}
 
