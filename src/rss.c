@@ -8,6 +8,9 @@
 #include "headlines.h"
 #include "story.h"
 
+#define INBOX_SIZE_MAX (440)
+#define OUTBOX_SIZE_MAX (440)
+
 static void in_received_handler(DictionaryIterator *iter, void *context);
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context);
 static void timer_callback(void *data);
@@ -18,7 +21,7 @@ static char *error = NULL;
 void rss_init(void) {
 	app_message_register_inbox_received(in_received_handler);
 	app_message_register_outbox_failed(out_failed_handler);
-	app_message_open_max();
+	app_message_open(INBOX_SIZE_MAX, OUTBOX_SIZE_MAX);
 
 	timer = app_timer_register(1000, timer_callback, NULL);
 
@@ -103,7 +106,7 @@ static void timer_callback(void *data) {
 	dict_write_uint8(iter, APP_KEY_METHOD, KEY_METHOD_BUFFERSIZE);
 	//dict_write_uint32(iter, APP_KEY_INDEX, app_message_inbox_size_maximum());
 	// Reducing the size of the buffer allows the story to be sent in chunks
-	uint32_t buffersize = 128;
+	uint32_t buffersize = INBOX_SIZE_MAX;
 	if (buffersize > app_message_inbox_size_maximum()) {
 		buffersize = app_message_inbox_size_maximum();
 	}

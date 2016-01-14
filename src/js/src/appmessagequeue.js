@@ -24,8 +24,7 @@ var appMessageQueue = {
 				appMessageQueue.working = false;
 				appMessageQueue.send();
 			};
-			var nack = function(data) {
-				console.log("Error: " + JSON.stringify(data));
+			var nack = function() {
 				appMessageQueue.numTries++;
 				appMessageQueue.working = false;
 				appMessageQueue.send();

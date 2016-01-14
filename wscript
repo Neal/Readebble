@@ -73,7 +73,7 @@ def build(ctx):
 
     # Bundle everything needed into the pbw file
     ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob('src/js/**/*.js'))
+    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob('src/js/pebble-js-app.js'))
 
 def generate_appinfo_h(task):
     src = task.inputs[0].abspath()
