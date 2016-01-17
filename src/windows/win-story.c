@@ -87,19 +87,15 @@ static void window_appear(Window *window) {
 }
 
 static void window_load(Window *window) {
-	//window_set_background_color(window, settings()->story_font_color ? GColorBlack : GColorWhite);
-	//window_set_background_color(window, GColorWhite);
 	GRect window_bounds = layer_get_bounds(window_get_root_layer(window));
 
 	story_text_layer = text_layer_create(window_bounds);
-	//text_layer_set_colors(story_text_layer, GColorBlack, GColorWhite);
 	text_layer_set_font(story_text_layer, settings_get_story_body_font_size());
 	text_layer_set_text_alignment(story_text_layer, GTextAlignmentCenter);
 	text_layer_set_text(story_text_layer, "Loading...");
 
 
 	title_text_layer = text_layer_create(window_bounds);
-	//text_layer_set_colors(title_text_layer, GColorBlack, GColorPastelYellow);
 	text_layer_set_font(title_text_layer, settings_get_story_title_font_size());
 	text_layer_set_text_alignment(title_text_layer, GTextAlignmentCenter);
 	text_layer_set_text(title_text_layer, headlines_get_current()->title);
@@ -146,36 +142,9 @@ static void window_load(Window *window) {
 
 	scroll_layer_set_paging(scroll_layer, true);
 
-
-
-	//text_layer_set_colors(title_text_layer, settings()->story_font_color ? GColorWhite : GColorBlack, GColorPastelYellow);
-	//text_layer_set_font(title_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-	//text_layer_set_text(title_text_layer, headlines_get_current()->title);
-
-	//scroll_layer_add_child(scroll_layer, text_layer_get_layer(title_text_layer));
-	//text_layer_enable_screen_text_flow_and_paging(title_text_layer, 2);
-
-	//GSize title_layer_size = text_layer_get_content_size(title_text_layer);
-	//title_layer_size.w = window_bounds.size.w;
-	//title_layer_size.h += 8;
-
-	//text_layer_set_size(title_text_layer, title_layer_size);
-
-	//GRect text_layer_bounds = window_bounds;
-	//text_layer_bounds.origin.y = title_layer_size.h;
-	//story_text_layer = text_layer_create(text_layer_bounds);
-	//text_layer_set_colors(story_text_layer, settings()->story_font_color ? GColorWhite : GColorBlack, GColorClear);
-
-
-	//GSize story_layer_size = text_layer_get_content_size(story_text_layer);
-	//story_layer_size.h = story_layer_size.h + 8;
-	//story_layer_size.h = window_bounds.size.h;
-	//text_layer_set_size(story_text_layer, story_layer_size);
-
 	// Set up the progress layer
 	progress_bar_layer = progress_bar_layer_create_fullscreen(window);
 	progress_bar_layer_set_pos(progress_bar_layer, title_layer_size.h);
-	//progress_bar_layer_set_colors(progress_bar_layer, GColorOrange, GColorWhite);
 	progress_bar_layer_set_progress(progress_bar_layer, 0);
 	scroll_layer_add_child(scroll_layer, progress_bar_layer_get_layer(progress_bar_layer));
 }

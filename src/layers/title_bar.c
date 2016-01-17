@@ -1,7 +1,11 @@
 #include <pebble.h>
 #include "layers/title_bar.h"
+#include "libs/pebble-assist.h"
 
-typedef struct TitleBarData {
+#define TITLE_LAYER_PAD (8)
+#define TITLE_TEXT_PAD (4)
+
+typedef struct _TitleBarData {
 	TitleBarLayerUpdateProc update_proc;
 	GColor foreground;
 	GColor background;
@@ -43,6 +47,7 @@ TitleBarLayer * title_bar_layer_create(GRect bounds) {
 	text_layer_set_text_alignment(title_bar_data->text_layer, GTextAlignmentCenter);
 	text_layer_set_text_color(title_bar_data->text_layer, GColorBlack);
 	text_layer_set_background_color(title_bar_data->text_layer, GColorClear);
+	text_layer_set_font(title_bar_data->text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD));
 
 	layer_add_child((Layer*)title_bar_layer, text_layer_get_layer(title_bar_data->text_layer));
 
@@ -105,6 +110,14 @@ int16_t title_bar_layer_get_height(TitleBarLayer * title_bar_layer) {
 	return layer_bounds.size.h;
 }
 
+void title_bar_layer_reduce_height(TitleBarLayer * title_bar_layer) {
+	TitleBarData *title_bar_data = (TitleBarData *)layer_get_data((Layer *)title_bar_layer);
+
+	GSize title_layer_size = text_layer_get_content_size(title_bar_data->text_layer);
+	int16_t height = title_layer_size.h + TITLE_LAYER_PAD;
+	title_bar_layer_set_height(title_bar_layer, height);
+}
+
 void title_bar_layer_set_colors(TitleBarLayer * title_bar_layer, GColor foreground, GColor background) {
 	TitleBarData *title_bar_data = (TitleBarData *)layer_get_data((Layer *)title_bar_layer);
 
@@ -159,7 +172,7 @@ void title_bar_layer_centre_text_vertically(TitleBarLayer * title_bar_layer) {
 	GRect text_bounds = layer_get_bounds(text_layer_get_layer(title_bar_data->text_layer));
 	GSize text_size = text_layer_get_content_size(title_bar_data->text_layer);
 
-	text_bounds.origin.y = (title_bar_bounds.size.h - text_size.h) / 2;
+	text_bounds.origin.y = (title_bar_bounds.size.h - text_size.h - TITLE_TEXT_PAD) / 2;
 	
 	layer_set_frame(text_layer_get_layer(title_bar_data->text_layer), text_bounds);
 }

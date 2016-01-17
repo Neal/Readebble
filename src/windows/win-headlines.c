@@ -29,9 +29,7 @@ static Window *window = NULL;
 static MenuLayer *menu_layer = NULL;
 static ProgressBarLayer *s_progress_bar_layer;
 static int16_t s_title_bar_height;
-#ifdef PBL_SDK_3
 static TitleBarLayer *s_status_bar;
-#endif
 
 void win_headlines_init(void) {
 	window = window_create();
@@ -125,6 +123,9 @@ static void window_load(Window *window) {
 	// Set up the status bar if it's needed
 	s_status_bar = title_bar_layer_create_fullscreen(window);
 	title_bar_layer_set_text(s_status_bar, subscriptions_get_current()->title);
+
+	title_bar_layer_reduce_height(s_status_bar);
+
 	s_title_bar_height = title_bar_layer_get_height(s_status_bar);
 
 #ifdef PBL_RECT
@@ -141,12 +142,8 @@ static void window_load(Window *window) {
 
 static void window_unload(Window *window) {
 	menu_layer_destroy_safe(menu_layer);
-
-#ifdef PBL_SDK_3
 	// Destroy the status bar if there is one
 	title_bar_layer_destroy(s_status_bar);
-#endif
-
 	// Destroy the progress bar
 	progress_bar_layer_destroy(s_progress_bar_layer);
 }
