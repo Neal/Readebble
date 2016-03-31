@@ -10,8 +10,8 @@ Readebble.bufferSize = 440;
 Readebble.init = function() {
 	Readebble.subscriptions = JSON.parse(localStorage.getItem('subscriptions')) || [];
 	Readebble.pocket = JSON.parse(localStorage.getItem('pocket')) || {};
-	if (!Readebble.subscriptions instanceof Array) Readebble.subscriptions = [];
-	if (!Readebble.pocket instanceof Object) Readebble.pocket = {};
+	if (!(Readebble.subscriptions instanceof Array)) Readebble.subscriptions = [];
+	if (!(Readebble.pocket instanceof Object)) Readebble.pocket = {};
 	Readebble.sendSubscriptions();
 	setTimeout(function() { Keen.addEvent('init', { subscriptions: { count: Readebble.subscriptions.length }, hasPocketToken: (Readebble.pocket.access_token !== 'undefined') }); }, 100);
 };
@@ -23,7 +23,7 @@ Readebble.sendError = function(type, err) {
 
 Readebble.sendSubscriptions = function() {
 	if (!this.subscriptions.length) {
-		return Readebble.sendError(TYPE.SUBSCRIPTION, 'No subscriptions found. Use the app settings in the Pebble mobile app to add subscriptions.');
+		return Readebble.sendError(TYPE.SUBSCRIPTION, 'No feeds configured');
 	}
 	appMessageQueue.send({type:TYPE.SUBSCRIPTION, method:METHOD.SIZE, index:Readebble.subscriptions.length});
 	for (var i = 0; i < Readebble.subscriptions.length; i++) {
@@ -45,6 +45,7 @@ Readebble.sendHeadlines = function() {
 
 Readebble.sendStory = function(story) {
 	var maxStoryBuffer = Readebble.bufferSize - 32;
+	appMessageQueue.send({type:TYPE.STORY, method:METHOD.SIZE, index:story.length});
 	for (var i = 0; i <= Math.floor(story.length/maxStoryBuffer); i++) {
 		appMessageQueue.send({type:TYPE.STORY, method:METHOD.DATA, title:story.substring(i * maxStoryBuffer, i * maxStoryBuffer + maxStoryBuffer)});
 	}
@@ -95,7 +96,7 @@ Readebble.addToPocket = function() {
 	if (!Readebble.pocket.access_token) return Pebble.showSimpleNotificationOnPebble('Readebble', 'No Pocket account found. Please log in to your Pocket account via the Pebble mobile app.');
 	var url = 'https://ineal.me/pebble/readebble/pocket/add';
 	var data = { access_token: Readebble.pocket.access_token, url: Readebble.currentHeadline.link };
-	http('POST', url, serialize(data), null, function (e) {
+	http('POST', url, serialize(data), {"Content-Type": "application/x-www-form-urlencoded"}, function (e) {
 		var res = JSON.parse(e.responseText);
 		debugLog(res);
 		if (res.item && res.status == 1) {

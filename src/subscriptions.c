@@ -54,7 +54,7 @@ void subscriptions_in_received_handler(DictionaryIterator *iter) {
 			if (tuple) {
 				strncpy(subscription->title, tuple->value->cstring, sizeof(subscription->title) - 1);
 			}
-			LOG("subscription: %d '%s'", subscription->index, subscription->title);
+			//LOG("subscription: %d '%s'", subscription->index, subscription->title);
 			subscriptions_reload_data_and_mark_dirty();
 			break;
 		}
